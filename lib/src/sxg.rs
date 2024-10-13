@@ -1,5 +1,11 @@
-use crate::{sha256_hash, verify_ecdsa_p256_r_s};
+use crate::{
+    sha256_hash,
+    test_cases::{DATA_TO_VERIFY, FINAL_PAYLOAD, PAYLOAD},
+    verify_ecdsa_p256_r_s,
+};
+use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SXGInput {
     pub final_payload: Vec<u8>,
     pub data_to_verify: Vec<u8>,
@@ -78,43 +84,32 @@ fn base64_encode_mice(input: &[u8]) -> String {
     result
 }
 
-pub fn sxg_verify(input: SXGInput) -> Result<bool, Box<dyn std::error::Error>> {
-    let SXGInput {
-        final_payload,
-        data_to_verify,
-        data_to_verify_start_index,
-        integrity_start_index,
-        payload,
-        r,
-        s,
-        px,
-        py,
-    } = input;
+impl SXGInput {
+    pub fn verify(&self) -> Result<bool, Box<dyn std::error::Error>> {
+        if self.payload[self.data_to_verify_start_index
+            ..self.data_to_verify_start_index + self.data_to_verify.len()]
+            != self.data_to_verify
+        {
+            return Ok(false);
+        }
 
-    if payload[data_to_verify_start_index..data_to_verify_start_index + data_to_verify.len()]
-        != data_to_verify
-    {
-        return Ok(false);
+        let mice = base64_encode_mice(&calculate_integrity(&self.payload, 16384));
+        let mice_bytes = mice.as_bytes();
+
+        if self.final_payload
+            [self.integrity_start_index..self.integrity_start_index + mice_bytes.len()]
+            != mice_bytes[..]
+        {
+            return Ok(false);
+        }
+
+        Ok(
+            verify_ecdsa_p256_r_s(&self.final_payload, &self.r, &self.s, &self.px, &self.py)
+                .is_ok(),
+        )
     }
 
-    let mice = base64_encode_mice(&calculate_integrity(&payload, 16384));
-    let mice_bytes = mice.as_bytes();
-
-    if final_payload[integrity_start_index..integrity_start_index + mice_bytes.len()]
-        != mice_bytes[..]
-    {
-        return Ok(false);
-    }
-
-    Ok(verify_ecdsa_p256_r_s(&final_payload, &r, &s, &px, &py).is_ok())
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::constants::{DATA_TO_VERIFY, FINAL_PAYLOAD, PAYLOAD};
-
-    #[test]
-    fn test_sxg() {
+    pub fn default_testcase() -> SXGInput {
         let final_payload = FINAL_PAYLOAD;
         let data_to_verify = DATA_TO_VERIFY;
         let payload = PAYLOAD;
@@ -134,7 +129,7 @@ mod tests {
         let px = hex::decode(px).unwrap();
         let py = hex::decode(py).unwrap();
 
-        let input = super::SXGInput {
+        SXGInput {
             final_payload: final_payload.to_vec(),
             data_to_verify: data_to_verify.to_vec(),
             data_to_verify_start_index,
@@ -144,8 +139,17 @@ mod tests {
             s: s.try_into().unwrap(),
             px: px.try_into().unwrap(),
             py: py.try_into().unwrap(),
-        };
+        }
+    }
+}
 
-        assert!(super::sxg_verify(input).unwrap());
+#[cfg(test)]
+mod tests {
+    use crate::sxg::SXGInput;
+
+    #[test]
+    fn test_sxg() {
+        let default_input = SXGInput::default_testcase();
+        assert!(default_input.verify().unwrap());
     }
 }

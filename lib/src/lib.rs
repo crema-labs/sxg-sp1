@@ -1,5 +1,5 @@
-pub mod constants;
 pub mod sxg;
+pub mod test_cases;
 
 use alloy_sol_types::sol;
 use p256::ecdsa::{signature::Verifier, Signature, VerifyingKey};
@@ -8,22 +8,8 @@ use sha2::{Digest, Sha256};
 sol! {
     /// The public values encoded as a struct that can be easily deserialized inside Solidity.
     struct PublicValuesStruct {
-        uint32 n;
-        uint32 a;
-        uint32 b;
+        uint32 result;
     }
-}
-
-/// Compute the n'th fibonacci number (wrapping around on overflows), using normal Rust code.
-pub fn fibonacci(n: u32) -> (u32, u32) {
-    let mut a = 0u32;
-    let mut b = 1u32;
-    for _ in 0..n {
-        let c = a.wrapping_add(b);
-        a = b;
-        b = c;
-    }
-    (a, b)
 }
 
 pub fn sha256_hash(bytes: &[u8]) -> [u8; 32] {
@@ -69,7 +55,7 @@ pub fn verify_ecdsa_p256_r_s(
 
 #[cfg(test)]
 mod tests {
-    use constants::FINAL_PAYLOAD;
+    use test_cases::FINAL_PAYLOAD;
 
     use super::*;
 
