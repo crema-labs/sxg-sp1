@@ -1743,6 +1743,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
  "fibonacci-lib",
+ "hex",
  "sp1-zkvm",
 ]
 

@@ -33,7 +33,6 @@ struct Args {
 }
 
 fn main() {
-    // Setup the logger.
     sp1_sdk::utils::setup_logger();
 
     // Parse the command line arguments.
@@ -83,6 +82,10 @@ fn main() {
             .expect("failed to generate proof");
 
         println!("Successfully generated proof!");
+
+        proof
+            .save("proof-with-io.json")
+            .expect("saving proof failed");
 
         // Verify the proof.
         client.verify(&proof, &vk).expect("failed to verify proof");
