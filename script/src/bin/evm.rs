@@ -28,7 +28,7 @@ struct EVMArgs {
     system: ProofSystem,
 
     #[clap(long, value_parser)]
-    input_file: PathBuf,
+    input_file: String,
 }
 
 /// Enum representing the available proof systems
@@ -78,14 +78,14 @@ fn main() {
     }
     .expect("failed to generate proof");
 
-    create_proof_fixture(&proof, &vk, args.system);
+    create_proof_fixture(&proof, &vk, args.input_file)
 }
 
 /// Create a fixture for the given proof.
 fn create_proof_fixture(
     proof: &SP1ProofWithPublicValues,
     vk: &SP1VerifyingKey,
-    system: ProofSystem,
+    input_file: String,
 ) {
     // Deserialize the public values.
     let bytes = proof.public_values.as_slice();
@@ -119,7 +119,7 @@ fn create_proof_fixture(
     let fixture_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../contracts/src/fixtures");
     std::fs::create_dir_all(&fixture_path).expect("failed to create fixture path");
     std::fs::write(
-        fixture_path.join(format!("{:?}-fixture.json", system).to_lowercase()),
+        fixture_path.join(format!("{:?}-fixture.json", input_file).to_lowercase()),
         serde_json::to_string_pretty(&fixture).unwrap(),
     )
     .expect("failed to write fixture");
