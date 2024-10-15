@@ -1,5 +1,6 @@
 pub mod sxg;
-pub mod test_cases;
+pub mod test_case_1;
+pub mod test_case_2;
 
 use alloy_sol_types::sol;
 use p256::ecdsa::{signature::Verifier, Signature, VerifyingKey};
@@ -55,7 +56,8 @@ pub fn verify_ecdsa_p256_r_s(
 
 #[cfg(test)]
 mod tests {
-    use test_cases::FINAL_PAYLOAD;
+    use test_case_1::FINAL_PAYLOAD_1;
+    use test_case_2::FINAL_PAYLOAD_2;
 
     use super::*;
 
@@ -83,8 +85,22 @@ mod tests {
         let px: [u8; 32] = hex::decode(px1).unwrap().try_into().unwrap();
         let py: [u8; 32] = hex::decode(py1).unwrap().try_into().unwrap();
 
-        let result0 = verify_ecdsa_p256_r_s(FINAL_PAYLOAD, &r, &s, &px, &py).unwrap();
+        let result0 = verify_ecdsa_p256_r_s(FINAL_PAYLOAD_1, &r, &s, &px, &py).unwrap();
         assert!(result0);
+
+        let px2 = "E3718107FBB87954103F30F5D611F3A16D2997FFA6830EEEF666B243FD562594";
+        let py2 = "C3FD5B2E946914400E26DC518AF9CEA72080148A22377F36902EEB0FBA2BD454";
+
+        let r2 = "8F05B0DC32FE4F4EB60C630BFAA722DC9839202BC02E04B0AB3F97112E2E683C";
+        let s2 = "FECEAC9E4DDDA1A332C60504ADDADD6BC7986370B2D26ED9172E6334EEE76608";
+
+        let r_1: [u8; 32] = hex::decode(r2).unwrap().try_into().unwrap();
+        let s_1: [u8; 32] = hex::decode(s2).unwrap().try_into().unwrap();
+        let px_1: [u8; 32] = hex::decode(px2).unwrap().try_into().unwrap();
+        let py_1: [u8; 32] = hex::decode(py2).unwrap().try_into().unwrap();
+
+        let result1 = verify_ecdsa_p256_r_s(FINAL_PAYLOAD_2, &r_1, &s_1, &px_1, &py_1).unwrap();
+        assert!(result1);
 
         let r_hex = "6a7570a91dd49c4ff738efd81ceaadbf89daad02611d184e276906eeb3671225";
         let s_hex = "4ff40cda556ed67ef04b3933e2e92830b6cfae684da605f07f779fad78945e22";

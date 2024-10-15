@@ -1,6 +1,7 @@
 use crate::{
     sha256_hash,
-    test_cases::{DATA_TO_VERIFY, FINAL_PAYLOAD, PAYLOAD},
+    test_case_1::{DATA_TO_VERIFY_1, FINAL_PAYLOAD_1, PAYLOAD_1},
+    test_case_2::{DATA_TO_VERIFY_2, FINAL_PAYLOAD_2, PAYLOAD_2},
     verify_ecdsa_p256_r_s,
 };
 use base64::Engine;
@@ -79,10 +80,10 @@ impl SXGInput {
         )
     }
 
-    pub fn default_testcase() -> SXGInput {
-        let final_payload = FINAL_PAYLOAD;
-        let data_to_verify = DATA_TO_VERIFY;
-        let payload = PAYLOAD;
+    pub fn default_testcase_1() -> SXGInput {
+        let final_payload = FINAL_PAYLOAD_1;
+        let data_to_verify = DATA_TO_VERIFY_1;
+        let payload = PAYLOAD_1;
 
         let data_to_verify_start_index = 0;
         let integrity_start_index = 694 / 2;
@@ -111,6 +112,39 @@ impl SXGInput {
             py: py.try_into().unwrap(),
         }
     }
+
+    pub fn default_testcase_2() -> SXGInput {
+        let final_payload = FINAL_PAYLOAD_2;
+        let data_to_verify = DATA_TO_VERIFY_2;
+        let payload = PAYLOAD_2;
+
+        let data_to_verify_start_index = 7504;
+        let integrity_start_index = 349;
+
+        let px = "E3718107FBB87954103F30F5D611F3A16D2997FFA6830EEEF666B243FD562594";
+        let py = "C3FD5B2E946914400E26DC518AF9CEA72080148A22377F36902EEB0FBA2BD454";
+
+        let r = "8F05B0DC32FE4F4EB60C630BFAA722DC9839202BC02E04B0AB3F97112E2E683C";
+        let s = "FECEAC9E4DDDA1A332C60504ADDADD6BC7986370B2D26ED9172E6334EEE76608";
+
+        let r = hex::decode(r).unwrap();
+        let s = hex::decode(s).unwrap();
+
+        let px = hex::decode(px).unwrap();
+        let py = hex::decode(py).unwrap();
+
+        SXGInput {
+            final_payload: final_payload.to_vec(),
+            data_to_verify: data_to_verify.to_vec(),
+            data_to_verify_start_index,
+            integrity_start_index,
+            payload: payload.to_vec(),
+            r: r.try_into().unwrap(),
+            s: s.try_into().unwrap(),
+            px: px.try_into().unwrap(),
+            py: py.try_into().unwrap(),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -119,7 +153,10 @@ mod tests {
 
     #[test]
     fn test_sxg() {
-        let default_input = SXGInput::default_testcase();
+        let default_input = SXGInput::default_testcase_1();
+        assert!(default_input.verify().unwrap());
+
+        let default_input = SXGInput::default_testcase_2();
         assert!(default_input.verify().unwrap());
     }
 }
