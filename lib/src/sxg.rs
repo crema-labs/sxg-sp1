@@ -120,7 +120,6 @@ mod tests {
     #[test]
     fn test_sxg() {
         let default_input = SXGInput::default_testcase();
-        dbg!(&default_input);
         assert!(default_input.verify().unwrap());
     }
 }
