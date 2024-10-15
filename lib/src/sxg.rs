@@ -3,6 +3,7 @@ use crate::{
     test_cases::{DATA_TO_VERIFY, FINAL_PAYLOAD, PAYLOAD},
     verify_ecdsa_p256_r_s,
 };
+use base64::Engine;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -49,41 +50,6 @@ fn calculate_integrity(input: &[u8], record_size: usize) -> [u8; 32] {
     proofs[0]
 }
 
-fn base64_encode_mice(input: &[u8]) -> String {
-    let base64_chars: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    let mut result = String::from("mi-sha256-03=");
-    let mut i = 0;
-
-    while i < input.len() {
-        let n = if i + 3 <= input.len() {
-            ((input[i] as u32) << 16) | ((input[i + 1] as u32) << 8) | (input[i + 2] as u32)
-        } else if i + 2 == input.len() {
-            ((input[i] as u32) << 16) | ((input[i + 1] as u32) << 8)
-        } else {
-            (input[i] as u32) << 16
-        };
-
-        result.push(base64_chars[((n >> 18) & 63) as usize] as char);
-        result.push(base64_chars[((n >> 12) & 63) as usize] as char);
-
-        if i + 1 < input.len() {
-            result.push(base64_chars[((n >> 6) & 63) as usize] as char);
-        } else {
-            result.push('=');
-        }
-
-        if i + 2 < input.len() {
-            result.push(base64_chars[(n & 63) as usize] as char);
-        } else {
-            result.push('=');
-        }
-
-        i += 3;
-    }
-
-    result
-}
-
 impl SXGInput {
     pub fn verify(&self) -> Result<bool, Box<dyn std::error::Error>> {
         if self.payload[self.data_to_verify_start_index
@@ -93,8 +59,12 @@ impl SXGInput {
             return Ok(false);
         }
 
-        let mice = base64_encode_mice(&calculate_integrity(&self.payload, 16384));
-        let mice_bytes = mice.as_bytes();
+        let prefix = (b"mi-sha256-03=").to_vec();
+        let payload = calculate_integrity(&self.payload, 16384).to_vec();
+
+        let mice_payload = base64::prelude::BASE64_STANDARD.encode(payload);
+        let mice = mice_payload.as_bytes();
+        let mice_bytes = [prefix, mice.to_vec()].concat();
 
         if self.final_payload
             [self.integrity_start_index..self.integrity_start_index + mice_bytes.len()]
