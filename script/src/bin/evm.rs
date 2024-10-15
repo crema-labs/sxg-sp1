@@ -15,7 +15,7 @@ use clap::{Parser, ValueEnum};
 use lib::{sxg::SXGInput, PublicValuesStruct};
 use serde::{Deserialize, Serialize};
 use sp1_sdk::{HashableKey, ProverClient, SP1ProofWithPublicValues, SP1Stdin, SP1VerifyingKey};
-use std::path::PathBuf;
+use std::{fs, path::PathBuf};
 
 /// The ELF (executable and linkable format) file for the Succinct RISC-V zkVM.
 pub const SXG_ELF: &[u8] = include_bytes!("../../../elf/riscv32im-succinct-zkvm-elf");
@@ -26,6 +26,9 @@ pub const SXG_ELF: &[u8] = include_bytes!("../../../elf/riscv32im-succinct-zkvm-
 struct EVMArgs {
     #[clap(long, value_enum, default_value = "groth16")]
     system: ProofSystem,
+
+    #[clap(long, value_parser)]
+    input_file: PathBuf,
 }
 
 /// Enum representing the available proof systems
@@ -61,8 +64,9 @@ fn main() {
     // Setup the inputs.
     let mut stdin = SP1Stdin::new();
 
-    // TestCase from crema.sh
-    let sxg_input = SXGInput::default_testcase();
+    let file_content = fs::read_to_string(&args.input_file).unwrap();
+    let sxg_input: SXGInput = serde_json::from_str(&file_content).unwrap();
+
     stdin.write(&sxg_input);
 
     println!("Proof System: {:?}", args.system);

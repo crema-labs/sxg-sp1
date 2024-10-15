@@ -9,6 +9,8 @@
 //! RUST_LOG=info cargo run --release -- --prove
 //! ```
 
+use std::{fs, path::PathBuf};
+
 use alloy_sol_types::SolType;
 use clap::Parser;
 use lib::{sxg::SXGInput, PublicValuesStruct};
@@ -26,6 +28,9 @@ struct Args {
 
     #[clap(long)]
     prove: bool,
+
+    #[clap(long, value_parser)]
+    input_file: PathBuf,
 }
 
 fn main() {
@@ -43,8 +48,8 @@ fn main() {
 
     let mut stdin = SP1Stdin::new();
 
-    // TestCase from crema.sh
-    let sxg_input = SXGInput::default_testcase();
+    let file_content = fs::read_to_string(&args.input_file).unwrap();
+    let sxg_input: SXGInput = serde_json::from_str(&file_content).unwrap();
 
     stdin.write(&sxg_input);
 
