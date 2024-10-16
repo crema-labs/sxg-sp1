@@ -28,7 +28,7 @@ struct EVMArgs {
     system: ProofSystem,
 
     #[clap(long, value_parser)]
-    input_file: String,
+    input_file_id: String,
 }
 
 /// Enum representing the available proof systems
@@ -64,7 +64,8 @@ fn main() {
     // Setup the inputs.
     let mut stdin = SP1Stdin::new();
 
-    let file_content = fs::read_to_string(&args.input_file).unwrap();
+    let input_file = format!("{}.json", args.input_file_id);
+    let file_content = fs::read_to_string(input_file).unwrap();
     let sxg_input: SXGInput = serde_json::from_str(&file_content).unwrap();
 
     stdin.write(&sxg_input);
@@ -78,14 +79,15 @@ fn main() {
     }
     .expect("failed to generate proof");
 
-    create_proof_fixture(&proof, &vk, args.input_file)
+    create_proof_fixture(&proof, &vk, args.input_file_id)
 }
 
 /// Create a fixture for the given proof.
 fn create_proof_fixture(
     proof: &SP1ProofWithPublicValues,
     vk: &SP1VerifyingKey,
-    input_file: String,
+
+    input_file_id: String,
 ) {
     // Deserialize the public values.
     let bytes = proof.public_values.as_slice();
@@ -98,6 +100,8 @@ fn create_proof_fixture(
         public_values: format!("0x{}", hex::encode(bytes)),
         proof: format!("0x{}", hex::encode(proof.bytes())),
     };
+
+    println!("Result: {}", fixture.result);
 
     // The verification key is used to verify that the proof corresponds to the execution of the
     // program on the given input.
@@ -116,10 +120,9 @@ fn create_proof_fixture(
     println!("Proof Bytes: {}", fixture.proof);
 
     // Save the fixture to a file.
-    let fixture_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../contracts/src/fixtures");
-    std::fs::create_dir_all(&fixture_path).expect("failed to create fixture path");
+    let fixture_path = PathBuf::from("");
     std::fs::write(
-        fixture_path.join(format!("{:?}-fixture.json", input_file).to_lowercase()),
+        fixture_path.join(format!("{}-fixture.json", input_file_id).to_lowercase()),
         serde_json::to_string_pretty(&fixture).unwrap(),
     )
     .expect("failed to write fixture");
