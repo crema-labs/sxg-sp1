@@ -10,6 +10,7 @@ sol! {
     /// The public values encoded as a struct that can be easily deserialized inside Solidity.
     struct PublicValuesStruct {
         uint32 result;
+        uint8[] data_to_verify;
     }
 }
 

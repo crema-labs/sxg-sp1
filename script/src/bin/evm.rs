@@ -65,6 +65,7 @@ fn main() {
     let mut stdin = SP1Stdin::new();
 
     let input_file = format!("{}.json", args.input_file_id);
+
     let file_content = fs::read_to_string(input_file).unwrap();
     let sxg_input: SXGInput = serde_json::from_str(&file_content).unwrap();
 
@@ -91,7 +92,10 @@ fn create_proof_fixture(
 ) {
     // Deserialize the public values.
     let bytes = proof.public_values.as_slice();
-    let PublicValuesStruct { result } = PublicValuesStruct::abi_decode(bytes, false).unwrap();
+    let PublicValuesStruct {
+        result,
+        data_to_verify,
+    } = PublicValuesStruct::abi_decode(bytes, false).unwrap();
 
     // Create the testing fixture so we can test things end-to-end.
     let fixture = SP1SXGProofFixture {
@@ -102,6 +106,9 @@ fn create_proof_fixture(
     };
 
     println!("Result: {}", fixture.result);
+
+    let data_to_verify_str = String::from_utf8(data_to_verify).unwrap();
+    println!("Data Verified: {:?}", data_to_verify_str);
 
     // The verification key is used to verify that the proof corresponds to the execution of the
     // program on the given input.
