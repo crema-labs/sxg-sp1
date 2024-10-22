@@ -16,7 +16,7 @@ Currently, only a few websites support SXG.
 
 Some of the websites that support SXG are:
 
-1. [vivi.wiki](https://vivs.wiki/blog/SXG)
+1. [vivs.wiki](https://vivs.wiki/blog/SXG)
 2. [crema.sh](https://crema.sh/)
 
 You can use these extension to verify whether sxg is enabled or not.
