@@ -12,7 +12,7 @@
 
 use alloy_sol_types::SolType;
 use clap::{Parser, ValueEnum};
-use lib::{sxg::SXGInput, PublicValuesStruct};
+use lib::{sxg::SXGInput, BlockParams, PublicValuesStruct};
 use serde::{Deserialize, Serialize};
 use sp1_sdk::{HashableKey, ProverClient, SP1ProofWithPublicValues, SP1Stdin, SP1VerifyingKey};
 use std::{fs, path::PathBuf};
@@ -94,7 +94,12 @@ fn create_proof_fixture(
     let bytes = proof.public_values.as_slice();
     let PublicValuesStruct {
         result,
-        data_to_verify,
+        blockParams: BlockParams {
+            block_number,
+            block_hash,
+        },
+        px,
+        py,
     } = PublicValuesStruct::abi_decode(bytes, false).unwrap();
 
     // Create the testing fixture so we can test things end-to-end.
@@ -107,8 +112,9 @@ fn create_proof_fixture(
 
     println!("Result: {}", fixture.result);
 
-    let data_to_verify_str = String::from_utf8(data_to_verify).unwrap();
-    println!("Data Verified: {:?}", data_to_verify_str);
+    println!("Block Number: {}", block_number);
+
+    println!("Block Hash: {}", block_hash);
 
     // The verification key is used to verify that the proof corresponds to the execution of the
     // program on the given input.

@@ -60,12 +60,11 @@ fn main() {
         let decoded = PublicValuesStruct::abi_decode(output.as_slice(), true).unwrap();
         let PublicValuesStruct {
             result,
-            data_to_verify,
+            blockParams,
+            px,
+            py,
         } = decoded;
         println!("SXG verification result: {}", result);
-
-        let data_to_verify_str = String::from_utf8(data_to_verify).unwrap();
-        println!("Data Verified: {:?}", data_to_verify_str);
 
         assert_eq!(result, 1);
         println!("SXG verification is successful!");

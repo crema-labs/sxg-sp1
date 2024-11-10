@@ -8,3 +8,4 @@ alloy-sol-types = { workspace = true }
 sp1-zkvm = "2.0.0"
 lib = { path = "../lib" }
 hex = "0.4.3"
+alloy = "0.6.2"

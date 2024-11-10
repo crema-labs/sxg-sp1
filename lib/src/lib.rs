@@ -7,10 +7,17 @@ use p256::ecdsa::{signature::Verifier, Signature, VerifyingKey};
 use sha2::{Digest, Sha256};
 
 sol! {
+
+    struct BlockParams {
+        uint256 block_number;
+        bytes32 block_hash;
+    }
     /// The public values encoded as a struct that can be easily deserialized inside Solidity.
     struct PublicValuesStruct {
         uint32 result;
-        uint8[] data_to_verify;
+        BlockParams blockParams;
+        uint256 px;
+        uint256 py;
     }
 }
 
