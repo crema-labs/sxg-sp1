@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Test, console} from "forge-std/Test.sol";
 import {stdJson} from "forge-std/StdJson.sol";
-import {Bob} from "../src/Bob.sol";
+import {SXGVerifier} from "../src/tickbit/Verifier.sol";
 import {SP1VerifierGateway} from "@sp1-contracts/SP1VerifierGateway.sol";
 
 struct SP1ProofFixtureJson {
@@ -15,7 +15,7 @@ struct SP1ProofFixtureJson {
 
 contract SXGTest is Test {
     address verifier;
-    Bob public bob;
+    SXGVerifier public sxgVerifier;
 
     function loadSample() public pure returns (SP1ProofFixtureJson memory) {
         return
@@ -32,7 +32,7 @@ contract SXGTest is Test {
 
         verifier = address(new SP1VerifierGateway(address(1)));
 
-        bob = new Bob(verifier, fixture.vkey);
+        sxgVerifier = new SXGVerifier(verifier, fixture.vkey);
     }
 
     function test_ValidSXGProof() public {
@@ -43,7 +43,7 @@ contract SXGTest is Test {
             abi.encode(true)
         );
 
-        uint32 result = bob.verifySXGProof(fixture.publicValues, fixture.proof);
+        uint32 result = sxgVerifier.verifySXGProof(fixture.publicValues, fixture.proof);
 
         assert(result == 1);
     }
@@ -53,7 +53,7 @@ contract SXGTest is Test {
 
         bytes memory fakeProof = new bytes(fixture.proof.length);
 
-        uint32 result = bob.verifySXGProof(fixture.publicValues, fixture.proof);
+        uint32 result = sxgVerifier.verifySXGProof(fixture.publicValues, fixture.proof);
         assert(result == 0);
     }
 }

@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {ISP1Verifier} from "@sp1-contracts/ISP1Verifier.sol";
+interface ISP1Verifier {
+    function verifyProof(
+        bytes32 _vkey,
+        bytes calldata _publicValues,
+        bytes calldata _proof
+    ) external view returns (bool);
+}
 
 struct BlockParams {
     uint256 block_number;
@@ -15,7 +21,6 @@ struct PublicValuesStruct {
 }
 
 /// @title SXGVerifier
-/// @author Crema Labs
 /// @notice This contract implements a verifier for proof of a mined bitcoin block, it's block number and hash as serverd inside a bitcoin explorer's web content.
 contract SXGVerifier {
     /// @notice The address of the SP1 verifier contract.
